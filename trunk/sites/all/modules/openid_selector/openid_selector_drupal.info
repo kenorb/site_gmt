@@ -1,0 +1,13 @@
+name = OpenID Selector for Drupal login
+description = OPTIONAL. Integrates Drupal login form into OpenID Selector as new account provider using favicon. Excludes OpenID Selector Inline module.
+package = OpenID Selector
+core = 7.x
+php = 5.1
+dependencies[] = openid_selector
+
+; Information added by drupal.org packaging script on 2011-05-08
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "openid_selector"
+datestamp = "1304814636"
+

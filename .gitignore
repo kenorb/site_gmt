@@ -1,0 +1,12 @@
+# Ignore configuration files that may contain sensitive information.
+trunk/sites/*/settings*.php
+
+# Ignore paths that contain user-generated content.
+trunk/sites/*/files
+trunk/sites/*/private
+
+# Ignore Finder metadata files on Mac
+.DS_Store
+
+# Vim's swap files
+*.swp
