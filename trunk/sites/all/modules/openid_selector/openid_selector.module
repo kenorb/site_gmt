@@ -52,7 +52,7 @@ function openid_selector_form_alter(&$form, $form_state, $form_id) {
  */
 function openid_selector_menu() {
   $items = array();
-  $items['admin/config/openid_selector'] = array(
+  $items['admin/config/people/openid_selector'] = array(
     'title' => 'OpenID Selector',
     'description' => 'Configure OpenID Selector',
     'page callback' => 'drupal_get_form',

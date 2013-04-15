@@ -1,19 +1,27 @@
-<?php 
-/*
+<?php
+/**
  * @file
  * Theme file to handle flash output.
- * 
- * Variables passed.
- * $video is the video object.
- * $node is the node object.
- * 
+ *
+ * Variables passed:
+ * $item
+ * $width
+ * $height
+ * $autoplay
+ * $autobuffering
  */
-?> 
-<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="<?php print $video->player_width; ?>" height="<?php print $video->player_height; ?>" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0">
-  <param name="movie" value="<?php print file_create_url($video->files->{$video->player}->uri); ?>" />
-  <param name="autoplay" value="<?php print $video->autoplay; ?>" />
+
+$url = check_plain(file_create_url($item['playablefiles'][0]->uri));
+$tnurl = '';
+if (!empty($item['thumbnailfile'])) {
+  $tnurl = check_plain($item['thumbnailfile']->url);
+}
+?>
+<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="<?php print $width; ?>" height="<?php print $height; ?>" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0">
+  <param name="movie" value="<?php print $url; ?>" />
+  <param name="autoplay" value="<?php print $autoplay ? 'true' : 'false'; ?>" />
   <param name="wmode" value="transparent" />
-  <object class="video-object" type="application/x-shockwave-flash" data="<?php print file_create_url($video->files->{$video->player}->uri); ?>" width="<?php print $video->player_width; ?>" height="<?php print $video->player_height; ?>">
-    <?php print t('No video?  Get the Adobe Flash !plugin', array('!plugin' => l(t('Plugin'), 'http://get.adobe.com/flashplayer/'))); ?>
+  <object class="video-object" type="application/x-shockwave-flash" data="<?php print $url; ?>" width="<?php print $width; ?>" height="<?php print $height; ?>">
+    <?php print t('No video? Get the !plugin', array('!plugin' => l(t('Adobe Flash plugin'), url('http://get.adobe.com/flashplayer/')))); ?>
   </object>
 </object>

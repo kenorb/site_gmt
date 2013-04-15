@@ -1,12 +1,11 @@
 <?php
-
 /**
  * @file
  * Video filter embedded code to add video as filter and using WYSIWYG
  */
 
 /**
- * Implementation of hook_wysiwyg_include_directory()
+ * Implements hook_wysiwyg_include_directory().
  */
 function video_wysiwyg_include_directory($type) {
   switch ($type) {
@@ -48,8 +47,6 @@ function video_filter($text) {
 
 /**
  * Create markup from tokens
- * @param type $match
- * @return type 
  */
 function video_token_to_markup($match) {
   $match = str_replace("[", "", $match);

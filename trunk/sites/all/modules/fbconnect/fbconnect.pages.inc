@@ -236,10 +236,14 @@ function facebook_login_page(&$form, $form_state = array()) {
     );
     return $form;
 }
+
+/**
+ * Returns a name suggestion if the wanted username is already used.
+ */
 function _fbconnect_get_username($name_suggestion) {
-  $query = "SELECT COUNT(name) FROM {users} WHERE name = ':user_name'";
-  $result = db_query($query, array('user_name' => $name_suggestion))->fetchField();
-  if ($result['name'] != 0) {
+  $query = "SELECT COUNT(name) FROM {users} WHERE name = :user_name";
+  $result = db_query($query, array(':user_name' => $name_suggestion))->fetchField();
+  if ($result) {
     $counter = variable_get('fbconnect_namecounter', 1);
     $newname = 'fbuser' . $counter;
     $counter++;
@@ -250,6 +254,7 @@ function _fbconnect_get_username($name_suggestion) {
   }
   return $newname;
 }
+
 function fbconnect_register_form_validate($form, &$form_state) {
   $fbuid = fbconnect_get_fbuid();
   //make sure we have a facebook user object by the time we get here otherwise drop form and exit with error message
@@ -287,6 +292,11 @@ function fbconnect_register_form_submit($form, &$form_state) {
   $form_state['uid'] = $user->uid;
   user_login_submit(array(), $form_state);
   $_SESSION['fbconnect_feed']['type'] = 'register';
+
+  $conf = fbconnect_get_config();
+  if ($conf['fast_reg_mode']) {
+    drupal_goto('user');
+  }
 }
 
 /**

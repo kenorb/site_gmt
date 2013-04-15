@@ -10,9 +10,9 @@ define('JAVASCRIPT_OPENID_SELECTOR_DOWNLOAD', 'http://openid-selector.googlecode
 
 function openid_selector_get_javascript_version() {
   if (!function_exists('libraries_get_path')) {
-    $files = drupal_system_listing('\.module$', 'modules', 'name', 0);
+    $files = drupal_system_listing('/\.module$/', 'modules', 'name', 0);
     if (array_key_exists('libraries', $files)) {
-      include_once $files['libraries']->filename;
+      include_once $files['libraries']->uri;
     }
   }
   $library_path = libraries_get_path('openid-selector');  

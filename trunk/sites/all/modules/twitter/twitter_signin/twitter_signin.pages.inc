@@ -1,8 +1,11 @@
 <?php
+/**
+ * @file
+ * Page callbacks for Twitter Signin module.
+ */
 
 /**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
+ * Settings form for Twitter Signin.
  */
 function twitter_signin_admin_settings($form, &$form_state) {
   $form = array();
@@ -16,7 +19,7 @@ function twitter_signin_admin_settings($form, &$form_state) {
   }
 
   $form['twitter_signin_button'] = array(
-    '#type' =>  'radios',
+    '#type' => 'radios',
     '#title' => t('Select sign-in button'),
     '#options' => $options,
     '#default_value' => variable_get('twitter_signin_button', 'Sign-in-with-Twitter-lighter-small.png'),

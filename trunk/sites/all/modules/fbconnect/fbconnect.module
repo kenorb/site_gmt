@@ -285,6 +285,7 @@ function fbconnect_add_user_afterlogin_submit($form, &$form_state) {
     $data = fbconnect_get_user_info(array('name', 'email'));
     //user not logged into facebook we dont have any information for them, let them log in again
     if (empty($data)) {
+        module_load_include('inc', 'fbconnect', 'fbconnect.pages');
         return facebook_login_page($form, $form_state);
     }
     $uid = _email_allready_exist($data['email']);
@@ -336,8 +337,7 @@ function fbconnect_render_button($attr = array(), $op = null) {
 }
 
 /**
- *  add Libraries API support, see: http://drupal.org/project/libraries
- *  implement hook_libraries_info()
+ * Implements hook_libraries_info().
  */
 function fbconnect_libraries_info() {
   // Returns an associative array, with information about external library
@@ -368,15 +368,21 @@ function fbconnect_libraries_info() {
 }
 
 /**
- * It locates and loads the Facebook PHP SDK library
+ * Locates and loads the Facebook PHP SDK library.
  */
 function _facebook_client_load_include() {
   if (!class_exists('Facebook')) {
-    module_load_include('module', 'libraries');
-    $library = libraries_load('facebook-php-sdk');
-    if ($library['loaded']) {
-      watchdog('fbconnect', t('Facebook PHP SDK library loaded'));
-    } else {
+    if (function_exists('libraries_load')) {
+      $library = libraries_load('facebook-php-sdk');
+    }
+    else {
+      $sdk_path = DRUPAL_ROOT . '/sites/all/libraries/facebook-php-sdk/src/facebook.php';
+      $library = array('loaded' => file_exists($sdk_path));
+      if ($library['loaded']) {
+        require_once $sdk_path;
+      }
+    }
+    if (!$library['loaded']) {
       watchdog('fbconnect', t('Unable to load the required Facebook library, please check the README.txt for instructions on how to resolve this.'));
     }
   }
@@ -417,9 +423,7 @@ function facebook_client() {
  */
 function fbconnect_user_profile() {
   $user_profile = null;
-  $client = facebook_client();
-  $user = $client->getUser();
-  if ($user) {
+  if (($client = facebook_client()) && ($user = $client->getUser())) {
     try {
       // Proceed knowing you have a logged in user who's authenticated.
       $user_profile = $client->api('/me');
@@ -1002,7 +1006,7 @@ function theme_fbconnect_login_button($variables) {
     $url = url('fbconnect/register/create');
     $title = t('Hello %name', array('%name' => $user_profile['name']));
     $desc = t('Login to this site using your Facebook credentials.');
-    $link = '<a href="/fbconnect/register/create" class="fb_button fb_button_' . $attr['size'] . '"><span class="fb_button_text">' . $text . '</span></a>';
+    $link = l('<span class="fb_button_text">' . $text . '</span>', 'fbconnect/register/create', array('html' => TRUE, 'attributes' => array('class' => array('fb_button fb_button_' . $attr['size']))));
     $button = '<button onclick="location.href=\'' . $url . '\'" id="fblogin" type="button">Log in</button>';
     return '<h3>' . $title . '</h3>' . $desc . $link;
   }

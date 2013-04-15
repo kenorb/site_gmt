@@ -288,7 +288,7 @@ class SimplenewsSpool implements SimplenewsSpoolInterface {
         'status' => SIMPLENEWS_SPOOL_DONE,
         'error' => TRUE
       );
-      return $this->prepareMail();
+      return $this->nextSource();
     }
 
     if ($spool_data->data) {
@@ -296,6 +296,16 @@ class SimplenewsSpool implements SimplenewsSpoolInterface {
     }
     else {
       $subscriber = simplenews_subscriber_load_by_mail($spool_data->mail);
+    }
+
+    if (!$subscriber) {
+      // If loading the subscriber failed, set the processed status done and
+      // proceed with the next mail.
+      $this->processed[$spool_data->msid]->result = array(
+        'status' => SIMPLENEWS_SPOOL_DONE,
+        'error' => TRUE
+      );
+      return $this->nextSource();
     }
 
     $source_class = $this->getSourceImplementation($spool_data);
@@ -458,8 +468,8 @@ class SimplenewsSourceNode implements SimplenewsSourceNodeInterface {
 
     // If receipt is requested, add headers.
     if ($this->category->receipt) {
-      $headers['Disposition-Notification-To'] = $from;
-      $headers['X-Confirm-Reading-To'] = $from;
+      $headers['Disposition-Notification-To'] = $this->getFromAddress();
+      $headers['X-Confirm-Reading-To'] = $this->getFromAddress();
     }
 
     // Add priority if set.
@@ -492,8 +502,8 @@ class SimplenewsSourceNode implements SimplenewsSourceNodeInterface {
     }
 
     // Add user specific header data.
-    $message['headers']['From'] = $this->getFromFormatted();
-    $message['headers']['List-Unsubscribe'] = '<' . token_replace('[simplenews-subscriber:unsubscribe-url]', $this->getTokenContext(), array('sanitize' => FALSE)) . '>';
+    $headers['From'] = $this->getFromFormatted();
+    $headers['List-Unsubscribe'] = '<' . token_replace('[simplenews-subscriber:unsubscribe-url]', $this->getTokenContext(), array('sanitize' => FALSE)) . '>';
 
     // Add general headers
     $headers['Precedence'] = 'bulk';
@@ -529,17 +539,12 @@ class SimplenewsSourceNode implements SimplenewsSourceNodeInterface {
    * Implements SimplenewsSourceInterface::getFromFormatted().
    */
   function getFromFormatted() {
-    $name = $this->getCategory()->from_name;
-
-    // Windows based PHP systems don't accept formatted emails.
+    // Windows based PHP systems don't accept formatted email addresses.
     if (drupal_substr(PHP_OS, 0, 3) == 'WIN') {
       return $this->getFromAddress();
     }
-    else {
-      return '"' . $name . '" <' . $this->getFromAddress() . '>';
-    }
 
-    return $formatted_address;
+    return '"' . addslashes(mime_header_encode($this->getCategory()->from_name)) . '" <' . $this->getFromAddress() . '>';
   }
 
   /**
@@ -789,7 +794,7 @@ class SimplenewsSourceNode implements SimplenewsSourceNodeInterface {
       return $cache;
     }
     $final_footer = token_replace($this->buildFooter($format), $this->getTokenContext(), array('sanitize' => FALSE));
-    $this->cache->set('build', 'footer:' . $format, $final_footer);
+    $this->cache->set('final', 'footer:' . $format, $final_footer);
     $this->resetContext();
     return $final_footer;
   }
